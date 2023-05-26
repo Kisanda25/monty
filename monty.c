@@ -36,11 +36,75 @@ int main(int argc, char *argv[])
 		index++;
 		if (get_line > 0)
 		{
-			execute(data, &stack, index, file);
+			handler(data, &stack, index, file);
 		}
 		free(data);
 	}
 	free_stack(stack);
 	fclose(file);
 return (0);
+}
+
+/**
+ * free_stack - Frees the memory of a doubly linked list-based stack.
+ * @head: Pointer to the head node of the stack.
+ *
+ * This function traverses a doubly linked list stack and frees the memory
+ * allocated for each node in the stack. It starts from the head node and
+ * iterates through the list, deallocating the memory for each node until the
+ * end of the stack is reached. After freeing all nodes, the head pointer is
+ * set to NULL to indicate an empty stack.
+ */
+void free_stack(stack_t *head)
+{
+	stack_t *current = head;
+
+	while (current != NULL)
+{
+	stack_t *temp = current;
+
+	current = current->next;
+	free(temp);
+	}
+}
+
+/**
+* handler - handles the opcode
+* @stack: head linked list - stack
+* @index: index
+* @file: poiner to monty file
+* @data: data
+* Return: no return
+*/
+int handler(char *data, stack_t **stack, unsigned int index, FILE *file)
+{
+	instruction_t opst[] = {
+				{"push", f_push}, {"pall", f_pall}, {"pint", f_pint},
+				{"pop", f_pop}
+				{"swap", f_swap},
+				{"add", f_add},
+				{"nop", f_nop}
+				};
+	unsigned int i = 0;
+	char *op;
+
+	op = strtok(data, " \n\t");
+	if (op && op[0] == '#')
+		return (0);
+	state.arg = strtok(NULL, " \n\t");
+	while (opst[i].opcode && op)
+	{
+		if (strcmp(op, opst[i].opcode) == 0)
+		{	opst[i].f(stack, index);
+			return (0);
+		}
+		i++;
+	}
+	if (op && opst[i].opcode == NULL)
+	{ fprintf(stderr, "L%d: unknown instruction %s\n", counter, op);
+		fclose(file);
+		free(data);
+		free_stack(*stack);
+		exit(EXIT_FAILURE); }
+	return (1);
 }
